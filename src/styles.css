@@ -29,6 +29,7 @@
 }
 @media(min-width:761px) and (max-width:1050px){
  h1{font-size:clamp(38px,4.9vw,51px)}
+ .stage-caption{display:none}
  .hero-description{font-size:13px}
  .example-text h2{font-size:14px}
  .example-text p{font-size:10px}
