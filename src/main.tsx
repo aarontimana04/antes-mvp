@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Streamlit } from 'streamlit-component-lib';
-import { ArrowUpRight, ArrowRight, Check, CheckCheck, ChevronRight, CreditCard, CalendarDays, Wallet, Sparkles, X, LockKeyhole, Wifi, Coffee, ShoppingBag, BookOpen, CircleHelp, Download } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, Check, CheckCheck, ChevronRight, CreditCard, CalendarDays, Wallet, Sparkles, X, LockKeyhole, Wifi, Coffee, ShoppingBag, BookOpen, CircleHelp } from 'lucide-react';
 import './styles.css';
 
 type Topic = 'costos' | 'fechas' | 'pagos';
-type InterestEvent = { type: 'interest' | 'email'; at: string; email?: string };
-const STORAGE_KEY = 'antes-mvp-events-v1';
-
-function readEvents(): InterestEvent[] {
-  try {
-    const data: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(data) ? data.filter((e): e is InterestEvent => !!e && (e.type === 'interest' || e.type === 'email') && typeof e.at === 'string') : [];
-  } catch { return []; }
-}
+type Metrics = { clicks: number; emails: number; submissions: number; updated_at: string };
+type ServerArgs = { stats: Metrics | null; available: boolean; admin_url: string; response?: { id: string; ok: boolean; error?: string; stats?: Metrics } };
+type Action = { type: 'interest' | 'email' | 'refresh'; email?: string };
 
 const examples = {
   costos: {
@@ -41,8 +35,12 @@ function App() {
   const [modal, setModal] = useState<'interest' | 'about' | 'metrics' | null>(null);
   const [email, setEmail] = useState('');
   const [saved, setSaved] = useState(false);
-  const [storageError, setStorageError] = useState(false);
-  const [events, setEvents] = useState(readEvents);
+  const [server, setServer] = useState<ServerArgs | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [interestState, setInterestState] = useState<'pending' | 'saved' | 'error'>('pending');
+  const pendingRef = useRef<{ id: string; resolve: () => void; reject: (error: Error) => void; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const failedRef = useRef<{ signature: string; id: string } | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -52,12 +50,32 @@ function App() {
   useEffect(() => {
     if (window.parent === window) return;
     const resize = () => Streamlit.setFrameHeight(Math.ceil(document.getElementById('root')!.getBoundingClientRect().height));
-    Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, resize);
+    const render = (event: Event) => {
+      const args = (event as CustomEvent<{ args: ServerArgs }>).detail.args;
+      setServer(args);
+      const response = args.response;
+      if (response && pendingRef.current?.id === response.id) {
+        const pending = pendingRef.current;
+        pendingRef.current = null;
+        clearTimeout(pending.timer);
+        setBusy(false);
+        if (response.ok) {
+          failedRef.current = null;
+          if (response.stats) setServer(previous => previous ? { ...previous, stats: response.stats! } : previous);
+          pending.resolve();
+        } else pending.reject(new Error(response.error || 'No pudimos confirmar el registro.'));
+      }
+      resize();
+    };
+    Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, render);
     Streamlit.setComponentReady();
     const observer = new ResizeObserver(resize);
     observer.observe(document.getElementById('root')!);
     resize();
-    return () => { observer.disconnect(); Streamlit.events.removeEventListener(Streamlit.RENDER_EVENT, resize); };
+    return () => {
+      observer.disconnect(); Streamlit.events.removeEventListener(Streamlit.RENDER_EVENT, render);
+      if (pendingRef.current) { clearTimeout(pendingRef.current.timer); pendingRef.current.reject(new Error('Se interrumpió la conexión.')); }
+    };
   }, []);
 
   useEffect(() => {
@@ -84,35 +102,41 @@ function App() {
     };
   }, [modal]);
 
-  function record(event: InterestEvent) {
-    const next = [...readEvents(), event];
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      setEvents(next);
-      setStorageError(false);
-      return true;
-    } catch { setStorageError(true); return false; }
+  function sendAction(action: Action): Promise<void> {
+    if (window.parent === window) return Promise.reject(new Error('Abre la versión de Streamlit para participar en la prueba global.'));
+    if (pendingRef.current) return Promise.reject(new Error('Espera a que termine el registro anterior.'));
+    const signature = JSON.stringify(action);
+    const id = failedRef.current?.signature === signature ? failedRef.current.id : crypto.randomUUID();
+    const requestId = crypto.randomUUID();
+    failedRef.current = { signature, id };
+    setBusy(true);
+    setError('');
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        pendingRef.current = null;
+        setBusy(false);
+        reject(new Error('La confirmación está tardando. Puedes volver a intentar sin duplicar el evento.'));
+      }, 45000);
+      pendingRef.current = { id: requestId, resolve, reject, timer };
+      Streamlit.setComponentValue({ ...action, id, request_id: requestId });
+    });
   }
 
-  function showInterest() {
-    record({ type: 'interest', at: new Date().toISOString() });
-    setSaved(false);
-    setEmail('');
-    setModal('interest');
+  async function showInterest() {
+    setSaved(false); setEmail(''); setError(''); setInterestState('pending'); setModal('interest');
+    try { await sendAction({ type: 'interest' }); setInterestState('saved'); }
+    catch (err) { setInterestState('error'); setError((err as Error).message); }
   }
 
-  function exportEvents() {
-    const blob = new Blob([JSON.stringify(readEvents(), null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'antes-interes-local.json'; a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  async function saveEmail() {
+    try { await sendAction({ type: 'email', email: email.trim().toLowerCase() }); setSaved(true); }
+    catch (err) { setError((err as Error).message); }
   }
 
-  function clearEvents() {
-    if (!window.confirm('¿Borrar los registros de esta prueba en este navegador? Puedes exportarlos antes de continuar.')) return;
-    try { localStorage.removeItem(STORAGE_KEY); setEvents([]); setStorageError(false); }
-    catch { setStorageError(true); }
+  async function refreshMetrics() {
+    setError(''); setModal('metrics');
+    try { await sendAction({ type: 'refresh' }); }
+    catch (err) { setError((err as Error).message); }
   }
 
   return (
@@ -129,7 +153,7 @@ function App() {
             <div className="eyebrow"><span /> UTEC / TU PRIMERA TARJETA</div>
             <h1 id="hero-title">Tu primer crédito.<br />Con las cosas<br /><span className="clear-word">claras.<svg viewBox="0 0 350 20" aria-hidden="true"><path d="M5 12 Q160 -1 342 9 M20 18 Q180 5 322 15" /></svg></span><span className="title-spark" aria-hidden="true">✳</span></h1>
             <p className="hero-description">Que las condiciones del banco no te frenen.<br className="desktop-break" /> Entiende <strong>costos, fechas y pagos</strong> con ejemplos de tu día a día, antes de solicitar tu tarjeta.</p>
-            <div className="cta-row"><button className="primary-button" onClick={showInterest}>Quiero esto <ArrowUpRight size={22} /></button><span className="cta-note">Primero entender.<br />Después decidir.</span></div>
+            <div className="cta-row"><button className="primary-button" onClick={showInterest} disabled={busy}>Quiero esto <ArrowUpRight size={22} /></button><span className="cta-note">Primero entender.<br />Después decidir.</span></div>
             <div className="reassurance"><LockKeyhole size={13} /><span>Sin conectar tu banco. Sin solicitar una tarjeta.</span></div>
             <div className="audience-note"><span className="audience-icon"><BookOpen size={17} /></span><p>Pensado para estudiantes de <strong>UTEC</strong><br /><span>que quieren empezar su historial.</span></p></div>
           </div>
@@ -164,7 +188,7 @@ function App() {
 
         <div className="bottom-strip"><span className="strip-label">ANTES DE DECIDIR</span><span><span className="step-number">01</span> Entiende lo que pagas</span><span><span className="step-number">02</span> Ubica tus fechas</span><span><span className="step-number">03</span> Decide con claridad <ArrowUpRight size={16} /></span></div>
       </main>
-      <footer><span>antes<span className="accent">.</span> <span className="footer-divider">/</span> UTEC · Equipo 06</span><span>Proyecto académico independiente · Hecho por estudiantes</span><button onClick={() => { setEvents(readEvents()); setModal('metrics'); }}>Prueba local <ArrowUpRight size={12} /></button></footer>
+      <footer><span>antes<span className="accent">.</span> <span className="footer-divider">/</span> UTEC · Equipo 06</span><span>Proyecto académico independiente · Hecho por estudiantes</span><button onClick={refreshMetrics} disabled={busy}>Resultados globales <ArrowUpRight size={12} /></button></footer>
 
       {modal && <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={dialogRef}>
@@ -173,24 +197,30 @@ function App() {
             <div className="modal-symbol"><Sparkles size={27} /></div>
             <span className="modal-eyebrow">PRIMERO, LAS COSAS CLARAS</span>
             <h2 id="modal-title">Tu interés es<br />el primer paso<span className="accent">.</span></h2>
-            {storageError ? <p className="error-message" role="alert">El navegador no permitió guardar los datos. Puedes seguir viendo los ejemplos.</p> : <p>Registramos tu clic en este navegador. Estamos probando esta idea, y saber que te interesa nos ayuda a darle forma.</p>}
-            {!saved ? <form onSubmit={(e) => { e.preventDefault(); if (record({ type: 'email', at: new Date().toISOString(), email: email.trim().toLowerCase() })) setSaved(true); }}>
+            <p aria-live="polite">{interestState === 'pending' ? 'Estamos registrando tu interés…' : interestState === 'saved' ? 'Tu clic se guardó en el registro global. Estamos probando esta idea, y saber que te interesa nos ayuda a darle forma.' : 'No pudimos confirmar tu clic.'}</p>
+            {error && <p className="error-message" role="alert">{error}</p>}
+            {interestState === 'error' && <button className="text-button" disabled={busy} onClick={showInterest}>Volver a intentar</button>}
+            {!saved ? <form onSubmit={(e) => { e.preventDefault(); if (!busy && interestState === 'saved') void saveEmail(); }}>
               <label htmlFor="email">¿Quieres dejar tu correo? <span>(opcional)</span></label>
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@correo.com" autoComplete="email" maxLength={254} required />
-              <p className="privacy-note">Al guardarlo, aceptas almacenarlo en este navegador para la prueba académica. Este prototipo no envía correos ni transmite tus datos.</p>
-              <button className="primary-button" type="submit">Guardar mi interés <ArrowRight size={18} /></button>
-            </form> : <div className="success-box" role="status"><Check size={22} /><div><strong>¡Listo! Tu correo quedó guardado.</strong><span>Solo en este navegador, para esta prueba.</span></div></div>}
+              <p className="privacy-note">Al guardar, aceptas que el Equipo 06 almacene tu correo en el registro central para validar esta propuesta académica. No enviamos correos automáticos.</p>
+              <button className="primary-button" type="submit" disabled={busy || interestState !== 'saved'}>{busy ? 'Guardando…' : 'Guardar mi interés'} <ArrowRight size={18} /></button>
+            </form> : <div className="success-box" role="status"><Check size={22} /><div><strong>¡Listo! Tu correo quedó guardado.</strong><span>En el registro central del Equipo 06.</span></div></div>}
             <button className="text-button" onClick={() => setModal(null)}>{saved ? 'Volver a los ejemplos' : 'Seguir sin dejar mi correo'} <ArrowRight size={15} /></button>
           </>}
           {modal === 'about' && <>
             <div className="modal-symbol"><CircleHelp size={27} /></div><span className="modal-eyebrow">EL PORQUÉ DE ANTES.</span><h2 id="modal-title">Entender antes<br />de comprometerte<span className="accent">.</span></h2>
             <p>Para estudiantes de UTEC que buscan su primera tarjeta para iniciar su historial, pero la postergan porque las condiciones del banco son confusas, explicamos los costos, fechas y pagos con ejemplos de la vida diaria, para que reconozcan qué compromiso asumirán antes de solicitarla.</p>
-            <div className="about-note"><BookOpen size={20} /><p>Esta página es el MVP de la promesa del Equipo 06. El botón permite explorar si la propuesta despierta interés.</p></div><button className="primary-button" onClick={showInterest}>Quiero esto <ArrowUpRight size={20} /></button>
+            <div className="about-note"><BookOpen size={20} /><p>Esta página es el MVP de la promesa del Equipo 06. El botón permite explorar si la propuesta despierta interés.</p></div><button className="primary-button" onClick={showInterest} disabled={busy}>Quiero esto <ArrowUpRight size={20} /></button>
           </>}
           {modal === 'metrics' && <>
-            <div className="modal-symbol"><CreditCard size={27} /></div><span className="modal-eyebrow">VALIDACIÓN DEL MVP</span><h2 id="modal-title">De la idea<br />a una señal<span className="accent">.</span></h2><p>Registros de este navegador. Los clics incluyen repeticiones; no equivalen a personas únicas.</p>
-            <div className="metrics-grid"><div><strong>{events.filter(e => e.type === 'interest').length}</strong><span>Clics en «Quiero esto»</span></div><div><strong>{events.filter(e => e.type === 'email').length}</strong><span>Correos registrados</span></div></div>
-            <button className="primary-button" onClick={exportEvents}>Exportar registros <Download size={18} /></button><p className="privacy-note">El archivo JSON incluye fechas y los correos que se hayan guardado. No hay un registro compartido entre dispositivos.</p><button className="text-button" onClick={clearEvents}>Borrar registros de esta prueba</button>{storageError && <p role="alert" className="error-message">No se pudieron borrar los registros del navegador.</p>}
+            <div className="modal-symbol"><CreditCard size={27} /></div><span className="modal-eyebrow">VALIDACIÓN DEL MVP</span><h2 id="modal-title">De la idea<br />a una señal<span className="accent">.</span></h2><p>Resultados acumulados de todos los dispositivos. Los clics incluyen repeticiones; un mismo correo cuenta una sola vez como correo único.</p>
+            <div className="metrics-grid"><div><strong>{server?.stats?.clicks ?? '—'}</strong><span>Clics en «Quiero esto»</span></div><div><strong>{server?.stats?.emails ?? '—'}</strong><span>Correos únicos</span></div></div>
+            {error && <p role="alert" className="error-message">{error}</p>}
+            {!server?.available && !error && <p className="privacy-note">{server ? 'No se pudo conectar con el registro central. Pulsa Actualizar contadores para volver a intentar.' : 'Conectando con el registro central…'}</p>}
+            <button className="primary-button" onClick={refreshMetrics} disabled={busy}>{busy ? 'Actualizando…' : 'Actualizar contadores'} <ArrowRight size={18} /></button>
+            {server?.admin_url && <a className="text-button" href={server.admin_url} target="_blank" rel="noopener noreferrer">Ver correos y descargar Excel <ArrowUpRight size={16} /></a>}
+            <p className="privacy-note">El panel con correos y la descarga de Excel son privados. Necesitas entrar con la cuenta de ChatGPT del responsable del proyecto. Los registros anteriores guardados en cada navegador no se importan automáticamente.</p>
           </>}
         </div>
       </div>}

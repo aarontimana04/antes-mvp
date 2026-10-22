@@ -6,3 +6,5 @@ dist/
 .venv/
 __pycache__/
 .streamlit/secrets.toml
+
+/services/registro/

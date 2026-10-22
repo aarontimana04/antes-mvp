@@ -88,3 +88,7 @@
  .brand-star{display:none}
 }
 @media(max-width:360px){.header-caption{font-size:4.5px;padding-left:10px}.header{gap:10px}.header-link{font-size:8px}.brand{font-size:30px}}
+
+button:disabled{opacity:.58;cursor:wait;transform:none!important}
+.primary-button:disabled{box-shadow:0 5px 0 var(--campus-cyan)}
+a.text-button{line-height:1.6;text-align:center}
