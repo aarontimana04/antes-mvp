@@ -26,6 +26,8 @@ Los importes y fechas son ejemplos ilustrativos; no corresponden a una oferta ba
 
 React 19, TypeScript, Vite, Lucide y CSS con diseño adaptable, animaciones, manejo del foco y soporte para movimiento reducido. Las fuentes de Google son opcionales: si no hay conexión se usan fuentes del sistema.
 
+La identidad visual usa cian, negro y blanco, con referencias a UTEC y Lima, Perú. Paleta inspirada en [UTEC Store](https://store.utec.edu.pe/nosotros), conservando la marca propia `antes.`. Es un proyecto académico independiente.
+
 ## Streamlit
 
 La versión de Streamlit conserva la página React como componente con altura adaptable. No añade almacenamiento compartido.

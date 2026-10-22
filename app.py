@@ -14,7 +14,7 @@ st.set_page_config(
 
 st.html("""
 <style>
-html, body, [data-testid="stAppViewContainer"], .stApp { background: #f6f6ef; }
+html, body, [data-testid="stAppViewContainer"], .stApp { background: #f7fafc; }
 [data-testid="stHeader"] { display: none; }
 [data-testid="stMainBlockContainer"] { padding: 0; max-width: none; }
 [data-testid="stVerticalBlock"] { gap: 0; }
