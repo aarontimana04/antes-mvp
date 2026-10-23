@@ -70,7 +70,7 @@ export function ProblemSection() {
     </article>)}</div>
     <div className="research-strip">
       <div className="research-quote"><span className="quote-icon"><Quote size={18} /></span><div><blockquote>“Ya llevo un año postergándolo. Me da miedo sacarla porque mi trabajo todavía es un poco inestable.”</blockquote><p>Estudiante de UTEC · Entrevistas del Equipo 06</p></div></div>
-      <div className="research-context"><div className="sample-dots" aria-hidden="true">{Array.from({length:6},(_,i)=><span key={i} className={i<2?'highlight':''} />)}</div><p><strong>2 de 6 entrevistados</strong> señalaron la postergación de su primera tarjeta como su problema principal.</p><span>Exploración inicial, no representa a todo el campus.</span></div>
+      <div className="research-context"><div className="sample-dots" aria-hidden="true">{Array.from({length:6},(_,i)=><span key={i} className={i<2?'highlight':''} />)}</div><p><strong>El 33,3 % de los entrevistados</strong> señaló la postergación de su primera tarjeta como su problema principal.</p><span>Exploración inicial con 6 entrevistados; no representa a todo el campus.</span></div>
     </div>
     <div className="problem-bridge"><span>Empezamos por aclarar los costos, las fechas y los pagos.</span><span>Tú decides cuándo dar el siguiente paso. <ArrowDown size={14} /></span></div>
   </section>;

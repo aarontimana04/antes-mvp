@@ -1,38 +1,17 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Streamlit } from 'streamlit-component-lib';
+import { ExampleCarousel } from './ExampleCarousel';
 import { ProblemSection } from './ProblemSection';
-import { ArrowUpRight, ArrowRight, ArrowDown, Check, CheckCheck, ChevronRight, CreditCard, CalendarDays, Wallet, Sparkles, X, LockKeyhole, Wifi, Coffee, ShoppingBag, BookOpen, CircleHelp } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, ArrowDown, Check, CreditCard, Sparkles, X, LockKeyhole, Wifi, ShoppingBag, BookOpen, CircleHelp } from 'lucide-react';
 import './styles.css';
 
-type Topic = 'costos' | 'fechas' | 'pagos';
 type Metrics = { clicks: number; emails: number; submissions: number; updated_at: string };
 type ServerArgs = { stats: Metrics | null; available: boolean; admin_url: string; response?: { id: string; ok: boolean; error?: string; stats?: Metrics } };
 type Action = { type: 'interest' | 'email' | 'refresh'; email?: string };
 
-const examples = {
-  costos: {
-    tag: '01 / COSTOS', title: 'Un café no siempre cuesta solo un café.',
-    text: 'Si una tarjeta cobra mantenimiento, ese cargo puede sumarse a lo que compras. Pregunta qué comisiones tiene y cuándo se aplican.',
-    amount: 'S/ 15', label: 'Tu café', icon: Coffee,
-    detail: '+ cargos, si corresponden', takeaway: 'Mira el costo completo, no solo la compra.',
-  },
-  fechas: {
-    tag: '02 / FECHAS', title: 'El cierre y el pago son dos días distintos.',
-    text: 'El cierre reúne las compras de un periodo. La fecha de pago es el límite para pagar ese estado de cuenta. Ubica ambas antes de usar tu tarjeta.',
-    amount: '10 → 28', label: 'Cierre → fecha de pago', icon: CalendarDays,
-    detail: 'Ejemplo de un mes', takeaway: 'Dos fechas que conviene tener en tu calendario.',
-  },
-  pagos: {
-    tag: '03 / PAGOS', title: 'El pago mínimo no borra toda tu deuda.',
-    text: 'Imagina que tu estado de cuenta es de S/ 200 y pagas S/ 40. Todavía quedan S/ 160, antes de posibles intereses o cargos.',
-    amount: 'S/ 160', label: 'Aún pendientes', icon: Wallet,
-    detail: 'S/ 200 − S/ 40 pagados', takeaway: 'Distingue el pago mínimo del pago total.',
-  },
-};
 
 function App() {
-  const [topic, setTopic] = useState<Topic>('costos');
   const [modal, setModal] = useState<'interest' | 'about' | 'metrics' | null>(null);
   const [email, setEmail] = useState('');
   const [saved, setSaved] = useState(false);
@@ -46,8 +25,6 @@ function App() {
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const modalHeightRef = useRef<number | null>(null);
-  const example = examples[topic];
-  const ExampleIcon = example.icon;
 
   useEffect(() => {
     if (window.parent === window) return;
@@ -209,16 +186,7 @@ function App() {
               <div className="stage-caption"><span className="hand-arrow">↳</span> Del lenguaje del banco al tuyo.</div>
             </div>
 
-            <div className="example-area">
-              <div className="example-header"><span>UN ADELANTO DE LA IDEA</span><span className="live-dot" title="Ejemplo interactivo" /></div>
-              <div className="topic-tabs" aria-label="Elige un ejemplo">{(['costos', 'fechas', 'pagos'] as Topic[]).map((t) => <button key={t} aria-pressed={topic === t} onClick={() => setTopic(t)} className={topic === t ? 'active' : ''}>{t === 'costos' ? <CreditCard size={14} /> : t === 'fechas' ? <CalendarDays size={14} /> : <Wallet size={14} />}{t[0].toUpperCase() + t.slice(1)}</button>)}</div>
-              <div className="example-content" key={topic}>
-                <div className="example-text"><h2>{example.title}</h2><p>{example.text}</p></div>
-                <div className="receipt"><div className="receipt-label"><ExampleIcon size={14} />{example.label}</div><strong>{example.amount}</strong><span>{example.detail}</span></div>
-              </div>
-              <div className="example-bottom"><CheckCheck size={15} /><span>{example.takeaway}</span><ChevronRight size={15} /></div>
-              <p className="example-disclaimer">Ejemplos ilustrativos. Las condiciones dependen de cada banco y tarjeta.</p>
-            </div>
+            <ExampleCarousel />
           </div>
         </section>
 

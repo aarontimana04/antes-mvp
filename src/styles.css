@@ -98,3 +98,22 @@ a.text-button{line-height:1.6;text-align:center}
 .modal-overlay{overflow:hidden;padding:max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left))}
 .modal{min-height:0;max-height:calc(var(--visible-height, 100dvh) - 48px);overscroll-behavior:contain;scrollbar-width:thin}
 .modal input{font-size:16px}
+
+/* Native swipe and scroll snapping keep the examples usable on touch screens. */
+.example-carousel-track{display:grid;grid-auto-flow:column;grid-auto-columns:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;border-radius:4px}
+.example-carousel-track::-webkit-scrollbar{display:none}
+.example-slide{min-width:0;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column}
+.example-slide .example-content{animation:none;flex:1}
+.example-slide .example-bottom{min-height:32px;align-items:center}
+.example-slide .example-bottom>svg{margin-left:0;flex-shrink:0}
+.carousel-navigation{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px}
+.carousel-arrow{width:36px;height:36px;display:grid;place-items:center;background:#edf7fb;border:1px solid #d9eaf2;border-radius:50%;color:#007b9e;transition:background .2s,transform .2s}
+.carousel-arrow:hover{background:#daf3fd;transform:translateY(-1px)}
+.carousel-position{display:flex;align-items:center;gap:12px;color:#235269;font-size:10px;font-variant-numeric:tabular-nums}
+.carousel-position>span>span{color:#8298a4}
+.carousel-dots{display:flex;gap:2px}
+.carousel-dots button{display:grid;place-items:center;width:24px;height:32px;padding:0;background:transparent}
+.carousel-dots button span{width:5px;height:5px;background:#c8dce6;border-radius:8px;transition:width .25s,background .25s}
+.carousel-dots button[aria-current=true] span{width:17px;background:#00afe5}
+@media(max-width:760px){.carousel-arrow{width:44px;height:44px}.carousel-dots button{width:30px;height:44px}.carousel-position{font-size:11px}.carousel-navigation{margin-top:10px}}
+@media(prefers-reduced-motion:reduce){.carousel-arrow,.carousel-dots button span{transition:none}}
