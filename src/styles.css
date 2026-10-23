@@ -92,3 +92,4 @@
 button:disabled{opacity:.58;cursor:wait;transform:none!important}
 .primary-button:disabled{box-shadow:0 5px 0 var(--campus-cyan)}
 a.text-button{line-height:1.6;text-align:center}
+.modal{max-height:calc(var(--visible-height, 100dvh) - 48px)}

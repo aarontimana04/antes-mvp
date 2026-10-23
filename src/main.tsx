@@ -81,7 +81,11 @@ function App() {
   useEffect(() => {
     if (!modal) return;
     triggerRef.current = document.activeElement as HTMLElement;
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
+    let viewportHeight = Math.min(window.innerHeight, window.screen.height);
+    try { viewportHeight = Math.min(viewportHeight, window.top?.innerHeight || viewportHeight); } catch { /* Cross-origin parent: keep the safe local estimate. */ }
+    document.documentElement.style.setProperty('--visible-height', `${viewportHeight}px`);
+    const scrollFrame = requestAnimationFrame(() => dialogRef.current?.scrollIntoView({ block: 'center', inline: 'nearest' }));
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function handleKey(e: KeyboardEvent) {
@@ -96,6 +100,7 @@ function App() {
     }
     document.addEventListener('keydown', handleKey);
     return () => {
+      cancelAnimationFrame(scrollFrame);
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKey);
       triggerRef.current?.focus();
