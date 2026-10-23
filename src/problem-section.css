@@ -1,0 +1,48 @@
+.problem-discover{display:inline-flex;align-items:center;gap:9px;font-size:10px;color:#678694;margin:19px 0 0 46px;transition:color .2s}
+.problem-discover:hover{color:#007b9e}.problem-discover svg{transition:translate .2s}.problem-discover:hover svg{translate:0 3px}
+.problem-section{scroll-margin-top:30px;padding:44px 0 34px;margin:4px 0 30px;border-top:1px solid #dce7ed}
+.problem-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:36px;margin-bottom:28px}
+.problem-eyebrow{display:flex;align-items:center;gap:8px;font-size:9px;font-weight:600;letter-spacing:1.8px;color:#537887;margin:0 0 16px}
+.problem-eyebrow>span{width:6px;height:6px;background:#00bfff;border-radius:50%;box-shadow:0 0 0 4px #00bfff10}
+.problem-heading h2{font-family:'Manrope',sans-serif;font-size:clamp(26px,2.7vw,38px);letter-spacing:-1.4px;font-weight:650;line-height:1.2;margin:0}
+.problem-heading h2 span{color:#63818f}
+.problem-intro{max-width:280px;font-size:12px;line-height:1.9;color:#69828f;margin:0 0 3px}
+.concern-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.concern-card{overflow:hidden;border:1px solid #dce8ef;border-radius:14px;background:#fff;transition:transform .25s,box-shadow .25s,border-color .25s}
+.concern-card:hover{transform:translateY(-5px);border-color:#a9dcec;box-shadow:0 14px 30px #1847610a}
+.concern-art-wrap{position:relative;margin:12px 12px 0;background:#edf6fb;border-radius:9px;overflow:hidden}
+.concern-card:nth-child(2) .concern-art-wrap{background:#f0f5f8}
+.concern-card:nth-child(3) .concern-art-wrap{background:#ebf7fb}
+.concern-number{position:absolute;top:12px;left:13px;font-size:8px;letter-spacing:1px;color:#8aa6b3;z-index:1}
+.concern-art{display:block;width:100%;height:116px;margin:8px auto;max-width:300px;overflow:visible}
+.concern-copy{padding:19px 23px 23px}
+.concern-label{font-size:7px;letter-spacing:1.2px;font-weight:600;color:#47849b;margin:0 0 10px;line-height:1.5}
+.concern-copy h3{font-family:'Manrope',sans-serif;font-weight:700;font-size:19px;line-height:1.35;letter-spacing:-.6px;margin:0 0 11px;max-width:260px}
+.concern-description{font-size:11px;line-height:1.85;color:#6b8391;margin:0;max-width:300px}
+.research-strip{display:grid;grid-template-columns:1.45fr 1fr;gap:40px;margin-top:25px;padding:24px 27px;border-radius:12px;background:#eaf3f8;border:1px solid #dce8f0}
+.research-quote{display:flex;align-items:flex-start;gap:14px}
+.quote-icon{display:grid;place-items:center;width:31px;height:31px;flex-shrink:0;background:#d9eef8;border-radius:50%;color:#2d819c}
+.research-quote blockquote{font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;line-height:1.7;letter-spacing:-.15px;color:#3e6376;margin:0}
+.research-quote p{font-size:8px;color:#7b97a6;margin:10px 0 0;letter-spacing:.2px}
+.research-context{padding-left:26px;border-left:1px solid #cfdee6;align-self:center}
+.sample-dots{display:flex;gap:5px;margin-bottom:8px}
+.sample-dots>span{height:7px;width:7px;border-radius:50%;background:#cfdee7}
+.sample-dots>span.highlight{background:#00b4e6}
+.research-context p{font-size:9px;line-height:1.75;color:#66818f;margin:0;max-width:260px}
+.research-context strong{font-weight:650;color:#32596e}
+.research-context>span{display:block;font-size:7px;line-height:1.6;color:#829aa7;margin-top:6px}
+.problem-bridge{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:22px;font-size:10px;line-height:1.7;color:#557687}
+.problem-bridge>span:last-child{display:flex;align-items:center;gap:8px;color:#8299a5;font-size:9px}
+.problem-section[data-seen="false"] .concern-card{opacity:0;transform:translateY(16px)}
+.problem-section[data-seen="true"] .concern-card{animation:concern-reveal .55s both}
+.problem-section[data-seen="true"] .concern-card:nth-child(2){animation-delay:.1s}
+.problem-section[data-seen="true"] .concern-card:nth-child(3){animation-delay:.2s}
+.problem-section[data-seen="true"] .art-detail{animation:concern-float 5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.concern-card:nth-child(2) .art-detail{animation-delay:-1.5s}
+.concern-card:nth-child(3) .art-detail{animation-delay:-3s}
+@keyframes concern-reveal{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}
+@keyframes concern-float{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media(max-width:1050px){.concern-copy{padding:17px 18px 21px}.concern-copy h3{font-size:17px}.concern-description{font-size:10px}.concern-label{font-size:6.5px}.research-strip{gap:25px;padding:22px}.research-quote blockquote{font-size:12px}.research-context{padding-left:20px}.problem-intro{max-width:250px;font-size:11px}.problem-bridge{font-size:9px}.problem-bridge>span:last-child{font-size:8px}}
+@media(max-width:760px){.problem-section{padding-top:30px;margin-bottom:20px;padding-bottom:26px}.problem-heading{display:block;margin-bottom:23px}.problem-heading h2{font-size:29px;letter-spacing:-1px}.problem-eyebrow{font-size:8px;margin-bottom:14px}.problem-intro{font-size:12px;max-width:360px;margin-top:16px;line-height:1.8}.concern-grid{grid-template-columns:1fr;gap:13px}.concern-card{display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;padding:10px;gap:13px}.concern-art-wrap{margin:0;align-self:stretch;display:flex;align-items:center;min-height:145px}.concern-number{top:11px;left:10px;font-size:7px}.concern-art{height:auto;width:156px;min-width:156px;max-width:none;margin:0 -22px}.concern-copy{padding:10px 5px 10px 0}.concern-copy h3{font-size:16px;letter-spacing:-.4px;margin-bottom:8px}.concern-label{font-size:6px;letter-spacing:.8px;margin-bottom:8px}.concern-description{font-size:10px;line-height:1.8}.research-strip{grid-template-columns:1fr;gap:20px;padding:21px 19px;margin-top:20px}.research-quote{gap:10px}.research-quote blockquote{font-size:12px}.quote-icon{width:27px;height:27px}.research-context{padding:17px 0 0;border-left:0;border-top:1px solid #cfdee6}.research-context p{font-size:10px;max-width:100%}.research-context>span{font-size:8px}.research-quote p{font-size:7px;line-height:1.7}.problem-bridge{display:block;font-size:11px;line-height:1.8}.problem-bridge>span{display:block;max-width:275px}.problem-bridge>span:last-child{font-size:10px;margin-top:8px;max-width:100%}}
+@media(max-width:360px){.concern-card{grid-template-columns:91px minmax(0,1fr);gap:11px;padding:9px}.concern-art{min-width:143px;width:143px;margin-left:-26px}.concern-copy h3{font-size:15px}.concern-description{font-size:9px}.concern-label{font-size:5.5px;letter-spacing:.6px}.problem-heading h2{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.problem-section[data-seen="false"] .concern-card{opacity:1;transform:none}.problem-section .concern-card,.problem-section .art-detail{animation:none!important;transition:none!important}}

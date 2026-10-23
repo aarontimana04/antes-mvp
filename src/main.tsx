@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Streamlit } from 'streamlit-component-lib';
-import { ArrowUpRight, ArrowRight, Check, CheckCheck, ChevronRight, CreditCard, CalendarDays, Wallet, Sparkles, X, LockKeyhole, Wifi, Coffee, ShoppingBag, BookOpen, CircleHelp } from 'lucide-react';
+import { ProblemSection } from './ProblemSection';
+import { ArrowUpRight, ArrowRight, ArrowDown, Check, CheckCheck, ChevronRight, CreditCard, CalendarDays, Wallet, Sparkles, X, LockKeyhole, Wifi, Coffee, ShoppingBag, BookOpen, CircleHelp } from 'lucide-react';
 import './styles.css';
 
 type Topic = 'costos' | 'fechas' | 'pagos';
@@ -161,6 +162,7 @@ function App() {
             <div className="cta-row"><button className="primary-button" onClick={showInterest} disabled={busy}>Quiero esto <ArrowUpRight size={22} /></button><span className="cta-note">Primero entender.<br />Después decidir.</span></div>
             <div className="reassurance"><LockKeyhole size={13} /><span>Sin conectar tu banco. Sin solicitar una tarjeta.</span></div>
             <div className="audience-note"><span className="audience-icon"><BookOpen size={17} /></span><p>Pensado para estudiantes de <strong>UTEC</strong><br /><span>que quieren empezar su historial.</span></p></div>
+            <a className="problem-discover" href="#te-suena">¿También lo estás postergando? <ArrowDown size={13} /></a>
           </div>
 
           <div className="visual-panel">
@@ -191,6 +193,7 @@ function App() {
           </div>
         </section>
 
+        <ProblemSection />
         <div className="bottom-strip"><span className="strip-label">ANTES DE DECIDIR</span><span><span className="step-number">01</span> Entiende lo que pagas</span><span><span className="step-number">02</span> Ubica tus fechas</span><span><span className="step-number">03</span> Decide con claridad <ArrowUpRight size={16} /></span></div>
       </main>
       <footer><span>antes<span className="accent">.</span> <span className="footer-divider">/</span> UTEC · Equipo 06</span><span>Proyecto académico independiente · Hecho por estudiantes</span><button onClick={refreshMetrics} disabled={busy}>Resultados globales <ArrowUpRight size={12} /></button></footer>
