@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Streamlit } from 'streamlit-component-lib';
 import { ProblemSection } from './ProblemSection';
@@ -45,12 +45,13 @@ function App() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const modalHeightRef = useRef<number | null>(null);
   const example = examples[topic];
   const ExampleIcon = example.icon;
 
   useEffect(() => {
     if (window.parent === window) return;
-    const resize = () => Streamlit.setFrameHeight(Math.ceil(document.getElementById('root')!.getBoundingClientRect().height));
+    const resize = () => Streamlit.setFrameHeight(modalHeightRef.current ?? Math.ceil(document.getElementById('root')!.getBoundingClientRect().height));
     const render = (event: Event) => {
       const args = (event as CustomEvent<{ args: ServerArgs }>).detail.args;
       setServer(args);
@@ -79,20 +80,43 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!modal) return;
     triggerRef.current = document.activeElement as HTMLElement;
+    const embedded = window.parent !== window;
+    // Streamlit expands this iframe to the full landing page. A fixed dialog
+    // must instead use the browser viewport, including when the keyboard opens.
+    const ancestors: Window[] = [];
+    let ancestor: Window = window;
+    while (ancestor.parent !== ancestor) {
+      try {
+        const parent = ancestor.parent;
+        void parent.innerHeight;
+        ancestors.push(parent);
+        ancestor = parent;
+      } catch { break; }
+    }
+    const viewportWindow = ancestors[ancestors.length - 1] ?? (embedded ? null : window);
+    const updateViewport = () => {
+      const height = Math.floor(viewportWindow
+        ? viewportWindow.visualViewport?.height ?? viewportWindow.innerHeight
+        : window.screen.availHeight);
+      document.documentElement.style.setProperty('--visible-height', `${height}px`);
+      if (embedded) {
+        modalHeightRef.current = height;
+        Streamlit.setFrameHeight(height);
+      }
+    };
+    updateViewport();
+    viewportWindow?.addEventListener('resize', updateViewport);
+    viewportWindow?.visualViewport?.addEventListener('resize', updateViewport);
     closeRef.current?.focus({ preventScroll: true });
-    let viewportHeight = Math.min(window.innerHeight, window.screen.height);
-    try { viewportHeight = Math.min(viewportHeight, window.top?.innerHeight || viewportHeight); } catch { /* Cross-origin parent: keep the safe local estimate. */ }
-    document.documentElement.style.setProperty('--visible-height', `${viewportHeight}px`);
-    const scrollFrame = requestAnimationFrame(() => dialogRef.current?.scrollIntoView({ block: 'center', inline: 'nearest' }));
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setModal(null);
       if (e.key === 'Tab') {
-        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('button, input, a[href]');
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), a[href]');
         if (!focusable?.length) return;
         const first = focusable[0], last = focusable[focusable.length - 1];
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -101,10 +125,15 @@ function App() {
     }
     document.addEventListener('keydown', handleKey);
     return () => {
-      cancelAnimationFrame(scrollFrame);
+      viewportWindow?.removeEventListener('resize', updateViewport);
+      viewportWindow?.visualViewport?.removeEventListener('resize', updateViewport);
+      modalHeightRef.current = null;
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKey);
-      triggerRef.current?.focus();
+      if (embedded) Streamlit.setFrameHeight(Math.ceil(document.getElementById('root')!.getBoundingClientRect().height));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (modalHeightRef.current === null) triggerRef.current?.focus();
+      }));
     };
   }, [modal]);
 

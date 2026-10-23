@@ -93,3 +93,8 @@ button:disabled{opacity:.58;cursor:wait;transform:none!important}
 .primary-button:disabled{box-shadow:0 5px 0 var(--campus-cyan)}
 a.text-button{line-height:1.6;text-align:center}
 .modal{max-height:calc(var(--visible-height, 100dvh) - 48px)}
+
+/* Keep dialogs within the visible mobile viewport and scroll their content. */
+.modal-overlay{overflow:hidden;padding:max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left))}
+.modal{min-height:0;max-height:calc(var(--visible-height, 100dvh) - 48px);overscroll-behavior:contain;scrollbar-width:thin}
+.modal input{font-size:16px}
