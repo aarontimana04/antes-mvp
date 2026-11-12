@@ -154,7 +154,7 @@ function App() {
   return (
     <div className="site-shell">
       <header className="header">
-        <a className="brand" href="#" aria-label="antes, inicio">antes<span>.</span><span className="brand-star">✳</span></a>
+        <a className="brand" href="#" aria-label="b4Credit, inicio">b<span>4</span>Credit<span className="brand-star">✳</span></a>
         <div className="header-caption">DE ESTUDIANTES, PARA ESTUDIANTES.<br /><strong><span className="campus-name">UTEC</span> · LIMA, PERÚ</strong></div>
         <button className="header-link" onClick={() => setModal('about')}>La idea detrás <ArrowUpRight size={17} /></button>
       </header>
@@ -193,7 +193,7 @@ function App() {
         <ProblemSection />
         <div className="bottom-strip"><span className="strip-label">ANTES DE DECIDIR</span><span><span className="step-number">01</span> Entiende lo que pagas</span><span><span className="step-number">02</span> Ubica tus fechas</span><span><span className="step-number">03</span> Decide con claridad <ArrowUpRight size={16} /></span></div>
       </main>
-      <footer><span>antes<span className="accent">.</span> <span className="footer-divider">/</span> UTEC · Equipo 06</span><span>Proyecto académico independiente · Hecho por estudiantes</span><button onClick={refreshMetrics} disabled={busy}>Resultados globales <ArrowUpRight size={12} /></button></footer>
+      <footer><span>b<span className="accent">4</span>Credit <span className="footer-divider">/</span> UTEC · Equipo 06</span><span>Proyecto académico independiente · Hecho por estudiantes</span><button onClick={refreshMetrics} disabled={busy}>Resultados globales <ArrowUpRight size={12} /></button></footer>
 
       {modal && <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setModal(null); }}>
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" ref={dialogRef}>
@@ -214,7 +214,7 @@ function App() {
             <button className="text-button" onClick={() => setModal(null)}>{saved ? 'Volver a los ejemplos' : 'Seguir sin dejar mi correo'} <ArrowRight size={15} /></button>
           </>}
           {modal === 'about' && <>
-            <div className="modal-symbol"><CircleHelp size={27} /></div><span className="modal-eyebrow">EL PORQUÉ DE ANTES.</span><h2 id="modal-title">Entender antes<br />de comprometerte<span className="accent">.</span></h2>
+            <div className="modal-symbol"><CircleHelp size={27} /></div><span className="modal-eyebrow">El porqué de b4Credit</span><h2 id="modal-title">Entender antes<br />de comprometerte<span className="accent">.</span></h2>
             <p>Para estudiantes de UTEC que buscan su primera tarjeta para iniciar su historial, pero la postergan porque las condiciones del banco son confusas, explicamos los costos, fechas y pagos con ejemplos de la vida diaria, para que reconozcan qué compromiso asumirán antes de solicitarla.</p>
             <div className="about-note"><BookOpen size={20} /><p>Esta página es el MVP de la promesa del Equipo 06. El botón permite explorar si la propuesta despierta interés.</p></div><button className="primary-button" onClick={showInterest} disabled={busy}>Quiero esto <ArrowUpRight size={20} /></button>
           </>}

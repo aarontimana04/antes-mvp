@@ -7,7 +7,7 @@ from registry_client import RegistryClient, RegistryUnavailable
 
 ROOT = Path(__file__).resolve().parent
 st.set_page_config(
-    page_title="antes. — Tu primera tarjeta, con las cosas claras.",
+    page_title="b4Credit — Tu primera tarjeta, con las cosas claras.",
     page_icon=str(ROOT / "public" / "favicon.svg"),
     layout="wide",
     initial_sidebar_state="collapsed",

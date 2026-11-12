@@ -1,4 +1,4 @@
-# antes. — MVP del Equipo 06
+# b4Credit — MVP del Equipo 06
 
 Página académica para estudiantes de UTEC: entender costos, fechas y pagos antes de solicitar su primera tarjeta. React 19, TypeScript, Vite y Streamlit. Identidad visual en cian, negro y blanco inspirada en [UTEC Store](https://store.utec.edu.pe/nosotros).
 
